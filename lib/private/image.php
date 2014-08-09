@@ -581,6 +581,19 @@ class OC_Image {
 		}
 		return $this->resource;
 	}
+	
+	/**
+	* @brief Sets $this->resource from data in a string.
+	* @param $str A string of image data.
+	*/
+	public function setResourceFromString($str) {
+		$this->resource = @imagecreatefromstring($str);
+		if ($this->fileInfo) {
+			$this->mimeType = $this->fileInfo->buffer($str);
+			$this->imageType = $this->mime_type_to_image_type($this->mimeType());
+		}
+	}
+
 
 	/**
 	* @brief Loads an image from a string of data.
@@ -591,11 +604,7 @@ class OC_Image {
 		if(is_resource($str)) {
 			return false;
 		}
-		$this->resource = @imagecreatefromstring($str);
-		if ($this->fileInfo) {
-			$this->mimeType = $this->fileInfo->buffer($str);
-			$this->imageType = $this->mime_type_to_image_type($this->mimeType());
-		}
+		$this->setResourceFromString($str);
 		if(is_resource($this->resource)) {
 			imagealphablending($this->resource, false);
 			imagesavealpha($this->resource, true);
@@ -619,11 +628,7 @@ class OC_Image {
 		}
 		$data = base64_decode($str);
 		if($data) { // try to load from string data
-			$this->resource = @imagecreatefromstring($data);
-			if ($this->fileInfo) {
-				$this->mimeType = $this->fileInfo->buffer($data);
-				$this->imageType = $this->mime_type_to_image_type($this->mimeType());
-			}
+			$this->setResourceFromString($data);
 			if(!$this->resource) {
 				OC_Log::write('core', 'OC_Image->loadFromBase64, couldn\'t load', OC_Log::DEBUG);
 				return false;
